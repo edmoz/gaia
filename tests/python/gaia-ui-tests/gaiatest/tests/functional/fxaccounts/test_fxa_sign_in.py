@@ -84,11 +84,30 @@ class TestFxASignIn(GaiaTestCase):
         result_text = self.marionette.find_element(*self._app_result_text_locator).text
         result = result_text.split(":",1)
         result_data = json.loads(result[1])
-        #Success :{ "email": "blazquez149646@personatestuser.org", "verified": false }
+
         self.assertEqual(result[0].strip(), 'Success')
         self.assertEqual(result_data["verified"], False)
 
-        # self.marionette.find_element(*self._app_logout_button_locator).tap()
+
+        self.marionette.find_element(*self._app_getAccounts_button_locator).tap()
+
+        # validate result
+        self.wait_for_element_displayed(*self._app_result_text_locator)
+        result_text = self.marionette.find_element(*self._app_result_text_locator).text
+        result = result_text.split(":",1)
+        result_data = json.loads(result[1])
+
+        self.assertEqual(result[0].strip(), 'Success')
+        self.assertEqual(result_data["verified"], False)
 
 
+        self.marionette.find_element(*self._app_logout_button_locator).tap()
+
+        # validate result
+        self.wait_for_element_displayed(*self._app_result_text_locator)
+        result_text = self.marionette.find_element(*self._app_result_text_locator).text
+        result = result_text.split(":",1)
+
+        self.assertEqual(result[0].strip(), 'Success')
+        self.assertEqual(result[1].strip('"'), "No params")
 
