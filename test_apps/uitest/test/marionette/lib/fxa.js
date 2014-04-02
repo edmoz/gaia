@@ -7,12 +7,16 @@
 function FxA(client) {
     //this.client = client;
     this.client = client.scope({ searchTimeout: 20000 });
-}
 
+}
 /**
  * @type String Origin of FxA app
  */
 FxA.URL = 'app://uitest.gaiamobile.org';
+FxA.EMAIL = 'moz.johnny.quest@gmail.com';
+FxA.PASSWORD = 'hadjiisageek';
+
+FxA.maxTimeInMS = 3000;
 
 FxA.config = {
     settings: {
@@ -51,46 +55,70 @@ FxA.config = {
 FxA.Selectors = {
     body: 'body',
     bodyReady: 'body .view-body',
-    //apiFxaFrame: 'iframe[src*="tests_html/API/fxa.html"]',
     apiFxaFrame: 'test-iframe',
-    fxaFrame:  'fxa-iframe'
-    //duplicateHeader: '#title'
+    fxaFrame:  'fxa-iframe',
+    fxaEmailInput: '#fxa-email-input',
+    fxaPasswordInput: '#fxa-pw-input',
+    fxaPasswordSetInput: '#fxa-pw-set-input',
+    fxaPasswordRefresh: '#fxa-pw-input-refresh',
+    fxaModuleNext: '#fxa-module-next',
+    fxaErrorOK: '#fxa-error-ok'
 };
 
 FxA.prototype = {
     /**
      * Launches FxA app and focuses on frame.
      */
-    launch: function() {
+    launch: function () {
         var client = this.client;
         client.apps.launch(FxA.URL);
         client.apps.switchToApp(FxA.URL);
-        //this.client.helper.waitForElement(FxA.Selectors.bodyReady);
     },
-    relaunch: function() {
+
+    relaunch: function () {
         this.client.apps.close(FxA.URL, 'FxA');
         this.launch();
     },
 
-    typeEmail: function(email) {
+    typeEmail: function (email) {
         this.client.helper
-            //.waitForElement(Selector.composeEmailInput)
-            .waitForElement("#fxa-email-input")
-            .sendKeys(email);
+            .waitForElement(FxA.Selectors.fxaEmailInput)
+            .sendKeys(email)
+        this.client.helper.wait(FxA.maxTimeInMS);
     },
 
+    typePassword: function (password) {
+        this.client.helper
+            .waitForElement(FxA.Selectors.fxaPasswordInput)
+            .sendKeys(password)
+        this.client.helper.wait(FxA.maxTimeInMS);
+    },
+
+    onClick:  function (buttonId) {
+        this.client.helper.wait(FxA.maxTimeInMS);
+        this.client.findElement(buttonId, function(err, element) {
+            if(err) {
+                //console.log(buttonId + " not found!!!");
+            } else {
+                element.click(function () {
+                    //console.log("clicking: " + buttonId)
+                });
+            }
+        });
+        this.client.helper.wait(FxA.maxTimeInMS);
+    },
 
     /**
      * Returns a localized string from a properties file.
      * @param {String} file to open.
      * @param {String} key of the string to lookup.
      */
-    l10n: function(file, key) {
-        var string = this.client.executeScript(function(file, key) {
+    l10n: function (file, key) {
+        var string = this.client.executeScript(function (file, key) {
             var xhr = new XMLHttpRequest();
             var data;
             xhr.open('GET', file, false); // Intentional sync
-            xhr.onload = function(o) {
+            xhr.onload = function (o) {
                 data = JSON.parse(xhr.response);
             };
             xhr.send(null);
@@ -100,78 +128,13 @@ FxA.prototype = {
         return string[key]._;
     },
 
-    waitForSlideDown: function(element) {
-        var bodyHeight = this.client.findElement(FxA.Selectors.body).
-            size().height;
-        var test = function() {
-            return element.location().y >= bodyHeight;
-        };
-        this.client.waitFor(test);
-    },
-
-    waitForSlideUp: function(element) {
-        var test = function() {
-            return element.location().y <= 0;
-        };
-        this.client.waitFor(test);
-    },
-
-    waitForFormShown: function() {
-        var form = this.client.helper.waitForElement(FxA.Selectors.form),
-            location;
-        var test = function() {
-            location = form.location();
-            return location.y <= 0;
-        };
-        this.client.waitFor(test);
-    },
-
-    waitForFormTransition: function() {
-        var selectors = FxA.Selectors,
-            bodyHeight = this.client.findElement(selectors.body).size().height,
-            form = this.client.findElement(selectors.form);
-        var test = function() {
-            var location = form.location();
-            return location.y >= bodyHeight;
-        };
-        this.client.waitFor(test);
-    },
-
-    enterContactDetails: function(details) {
-
-        var selectors = FxA.Selectors;
-
-        details = details || {
-            givenName: 'Hello',
-            familyName: 'Contact'
-        };
-
-        this.waitForFormShown();
-
-        for (var i in details) {
-            // Camelcase details to match form.* selectors.
-            var key = 'form' + i.charAt(0).toUpperCase() + i.slice(1);
-
-            this.client.findElement(selectors[key])
-                .sendKeys(details[i]);
-        }
-
-        this.client.findElement(selectors.formSave).click();
-
-        this.waitForFormTransition();
-    },
-
-    addContact: function(details) {
-        var selectors = FxA.Selectors;
-
-        var addContact = this.client.findElement(selectors.formNew);
-        addContact.click();
-
-        this.enterContactDetails(details);
-
-        this.client.helper.waitForElement(selectors.list);
+    dumpPageSource: function () {
+      client.pageSource(function (err, dump) {
+        console.log('****************************************');
+        console.log(dump);
+        console.log('****************************************');
+      });
     }
-
 };
 
 module.exports = FxA;
