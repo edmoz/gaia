@@ -4,6 +4,9 @@
  * @constructor
  * @param {Marionette.Client} client for operations.
  */
+
+var assert = require('assert');
+
 function FxA(client) {
     //this.client = client;
     this.client = client.scope({ searchTimeout: 20000 });
@@ -57,12 +60,15 @@ FxA.Selectors = {
     bodyReady: 'body .view-body',
     apiFxaFrame: 'test-iframe',
     fxaFrame:  'fxa-iframe',
-    fxaEmailInput: '#fxa-email-input',
-    fxaPasswordInput: '#fxa-pw-input',
-    fxaPasswordSetInput: '#fxa-pw-set-input',
-    fxaPasswordRefresh: '#fxa-pw-input-refresh',
-    fxaModuleNext: '#fxa-module-next',
-    fxaErrorOK: '#fxa-error-ok'
+    tabAPI: '#API',
+    fxaButton: '#mozId-fxa',
+    requestButton: '#request',
+    emailInput: '#fxa-email-input',
+    passwordInput: '#fxa-pw-input',
+    passwordSetInput: '#fxa-pw-set-input',
+    passwordRefresh: '#fxa-pw-input-refresh',
+    moduleNext: '#fxa-module-next',
+    errorOK: '#fxa-error-ok'
 };
 
 FxA.prototype = {
@@ -80,32 +86,36 @@ FxA.prototype = {
         this.launch();
     },
 
+    selectFxaTest: function() {
+        this.client.helper.wait(FxA.maxTimeInMS);
+        assert.ok(this.onClick(FxA.Selectors.tabAPI) !== -1);
+        assert.ok(this.onClick(FxA.Selectors.fxaButton) !== -1);
+        client.switchToFrame(FxA.Selectors.apiFxaFrame);
+        assert.ok(this.onClick(FxA.Selectors.requestButton) !== -1);
+
+        this.client.switchToFrame();
+        this.client.switchToFrame(FxA.Selectors.fxaFrame);
+    },
+
     typeEmail: function (email) {
         this.client.helper
-            .waitForElement(FxA.Selectors.fxaEmailInput)
+            .waitForElement(FxA.Selectors.emailInput)
             .sendKeys(email)
         this.client.helper.wait(FxA.maxTimeInMS);
     },
 
     typePassword: function (password) {
         this.client.helper
-            .waitForElement(FxA.Selectors.fxaPasswordInput)
+            .waitForElement(FxA.Selectors.passwordInput)
             .sendKeys(password)
         this.client.helper.wait(FxA.maxTimeInMS);
     },
 
-    onClick:  function (buttonId) {
-        this.client.helper.wait(FxA.maxTimeInMS);
-        this.client.findElement(buttonId, function(err, element) {
-            if(err) {
-                //console.log(buttonId + " not found!!!");
-            } else {
-                element.click(function () {
-                    //console.log("clicking: " + buttonId)
-                });
-            }
-        });
-        this.client.helper.wait(FxA.maxTimeInMS);
+    onClick:  function(buttonId) {
+        //this.client.helper.wait(FxA.maxTimeInMS);
+        this.client.helper
+            .waitForElement(buttonId)
+            .tap();
     },
 
     /**
