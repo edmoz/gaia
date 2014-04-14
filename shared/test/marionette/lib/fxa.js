@@ -10,14 +10,23 @@ var assert = require('assert');
 function FxA(client) {
     //this.client = client;
     this.client = client.scope({ searchTimeout: 20000 });
-
 }
 /**
  * @type String Origin of FxA app
  */
 FxA.URL = 'app://uitest.gaiamobile.org';
-FxA.EMAIL = 'moz.johnny.quest@gmail.com';
-FxA.PASSWORD = 'hadjiisageek';
+
+// EXISTING USER
+//FxA.EMAIL = 'rmpappalardo@gmail.com';
+//FxA.EMAIL = 'johnny.quest@restmail.net';
+
+// NEW USER
+FxA.EMAIL = 'race.bannon@restmail.net';
+
+// INVALID USER - 3 periods are not good
+//FxA.EMAIL = 'moz.johnny.quest@gmail.com';
+
+FxA.PASSWORD = '12345678';
 
 FxA.maxTimeInMS = 3000;
 
@@ -55,19 +64,41 @@ FxA.config = {
     }
 };
 
+/*
+ * TODO:
+ * break off front-end specific selectors & functions so they can reside
+ * with test_apps / apps
+ * FxA specific stuff will eventually need to be shared and thus will live
+ * in gaia/shared/test
+ */
+
 FxA.Selectors = {
+
     body: 'body',
     bodyReady: 'body .view-body',
+
+    // test_apps/uitest
     apiFxaFrame: 'test-iframe',
     fxaFrame:  'fxa-iframe',
     tabAPI: '#API',
     fxaButton: '#mozId-fxa',
     requestButton: '#request',
+
+    // test_apps/test-fxa-client
+    // apps/settings
+    // apps/communications/ftu
+    // apps/homescreen/everything.me/modules/Results/providers?? marketplace
+    // apps/findmydevice
+
+    // fxa
     emailInput: '#fxa-email-input',
     passwordInput: '#fxa-pw-input',
     passwordSetInput: '#fxa-pw-set-input',
     passwordRefresh: '#fxa-pw-input-refresh',
+    COPPA: '#fxa-age-select',
+    COPPAOption: 'option[value="1990"]',
     moduleNext: '#fxa-module-next',
+    moduleDone: '#fxa-module-done',
     errorOK: '#fxa-error-ok'
 };
 
@@ -86,6 +117,7 @@ FxA.prototype = {
         this.launch();
     },
 
+    // test_apps/uitest
     selectFxaTest: function() {
         this.client.helper.wait(FxA.maxTimeInMS);
         assert.ok(this.onClick(FxA.Selectors.tabAPI) !== -1);
@@ -97,52 +129,64 @@ FxA.prototype = {
         this.client.switchToFrame(FxA.Selectors.fxaFrame);
     },
 
-    typeEmail: function (email) {
-        this.client.helper
-            .waitForElement(FxA.Selectors.emailInput)
-            .sendKeys(email)
+    //
+    selectAgeSelect: function(selectOption) {
+        this.client.helper.wait(FxA.maxTimeInMS);
+        assert.ok(this.onClickLong(FxA.Selectors.COPPA) !== -1);
+        //assert.ok(this.onClick('#fxa-year-of-birth') !== -1);
+        this.client.helper.wait(FxA.maxTimeInMS);
+        //assert.ok(this.onClick(selectOption) !== -1);
+        this.client.helper.wait(FxA.maxTimeInMS);
+
+        //this.client.findElement('#time-header a[href="/event/add/"]');
+    },
+
+    clickDone: function() {
+        this.client.switchToFrame();
+        this.client.switchToFrame(FxA.Selectors.fxaFrame);
+        this.client.helper.wait(FxA.maxTimeInMS);
+        assert.ok(this.onClick(FxA.Selectors.moduleDone) !== -1);
+        this.client.helper.wait(FxA.maxTimeInMS);
         this.client.helper.wait(FxA.maxTimeInMS);
     },
 
-    typePassword: function (password) {
+    enterInput: function (inputId, inputString) {
         this.client.helper
-            .waitForElement(FxA.Selectors.passwordInput)
-            .sendKeys(password)
+            .waitForElement(inputId)
+            .sendKeys(inputString)
         this.client.helper.wait(FxA.maxTimeInMS);
     },
 
-    onClick:  function(buttonId) {
+    onClick:  function(elementId) {
         //this.client.helper.wait(FxA.maxTimeInMS);
+        console.log("ELEMENT: " + elementId);
         this.client.helper
-            .waitForElement(buttonId)
+            .waitForElement(elementId)
             .tap();
     },
 
-    /**
-     * Returns a localized string from a properties file.
-     * @param {String} file to open.
-     * @param {String} key of the string to lookup.
-     */
-    l10n: function (file, key) {
-        var string = this.client.executeScript(function (file, key) {
-            var xhr = new XMLHttpRequest();
-            var data;
-            xhr.open('GET', file, false); // Intentional sync
-            xhr.onload = function (o) {
-                data = JSON.parse(xhr.response);
+    onClickLong:  function(elementId) {
+        //this.client.helper.wait(FxA.maxTimeInMS);
+        this.dumpPageSource();
+        console.log("long ELEMENT: " + elementId);
+        //this.client.findElement("#fxa-age-select", function(err, element) {
+        this.client.findElement(elementId, function(err, element) {
+            if(err) {
+              console.log(elementId + " not found");
+            } else {
+                console.log(elementId + " found");
             };
-            xhr.send(null);
-            return data;
-        }, [file, key]);
+        });
+        this.client.helper
+            .waitForElement(elementId)
+            .click();
 
-        return string[key]._;
     },
 
     dumpPageSource: function () {
       client.pageSource(function (err, dump) {
-        console.log('****************************************');
-        console.log(dump);
-        console.log('****************************************');
+        var LINE = '*******************************************************************************';
+        console.log(LINE + '\n' + dump + '\n' + LINE);
       });
     }
 };
