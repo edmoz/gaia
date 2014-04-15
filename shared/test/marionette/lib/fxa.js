@@ -1,7 +1,7 @@
 'use strict';
 
 var assert = require('assert');
-//var FxAUser = require('./fxa_user');
+var FxAUser = require('./fxa_user');
 /**
  * Abstraction around FxA app.
  * app URL is passed in since FxA isn't a standalone app
@@ -14,6 +14,10 @@ function FxA(client, URL) {
     //this.client = client;
     this.client = client.scope({ searchTimeout: 20000 });
     this.URL = URL;
+    var fxaNewUser = new FxAUser(client);
+    var fxaUser = fxaNewUser.newUser;
+    this.email = fxaUser.email;
+    this.password = fxaUser.password;
 }
 
 FxA.maxTimeInMS = 3000;
@@ -70,8 +74,15 @@ FxA.Selectors = {
   requestButton: '#request',
 
   // test_apps/test-fxa-client
+
   // apps/settings
+  menuItemFxa: '#menuItem-fxa',
+  fxaLogin: '#fxa-login',
+
   // apps/communications/ftu
+  forward: '#forward',
+  createAccountOrLogin: '#fxa-create-account',
+
   // apps/homescreen/everything.me/modules/Results/providers?? marketplace
   // apps/findmydevice
 
@@ -93,7 +104,11 @@ FxA.prototype = {
      */
     launch: function () {
       var client = this.client;
-      client.apps.launch(this.URL);
+
+      // do unless FTU
+      if(this.URL.search("communications") === -1) {
+          client.apps.launch(this.URL);
+      }
       client.apps.switchToApp(this.URL);
     },
 
@@ -104,7 +119,7 @@ FxA.prototype = {
 
     selectAgeSelect: function(selectOption) {
       this.client.helper.wait(FxA.maxTimeInMS);
-      assert.ok(this.onClickLong(FxA.Selectors.COPPA) !== -1);
+      assert.ok(this.onClickFrack(FxA.Selectors.COPPA) !== -1);
       //assert.ok(this.onClick('#fxa-year-of-birth') !== -1);
       this.client.helper.wait(FxA.maxTimeInMS);
       //assert.ok(this.onClick(selectOption) !== -1);
@@ -118,8 +133,6 @@ FxA.prototype = {
       this.client.switchToFrame(FxA.Selectors.fxaFrame);
       this.client.helper.wait(FxA.maxTimeInMS);
       assert.ok(this.onClick(FxA.Selectors.moduleDone) !== -1);
-      this.client.helper.wait(FxA.maxTimeInMS);
-      this.client.helper.wait(FxA.maxTimeInMS);
     },
 
     enterInput: function (inputId, inputString) {
@@ -130,16 +143,23 @@ FxA.prototype = {
     },
 
     onClick:  function(elementId) {
-      //this.client.helper.wait(FxA.maxTimeInMS);
+        console.log("ELEMENT: " + elementId);
+        this.client.helper
+            .waitForElement(elementId)
+            .tap();
+    },
+
+    onClickFrack:  function(elementId) {
       console.log("ELEMENT: " + elementId);
-      this.client.helper
-          .waitForElement(elementId)
-          .tap();
+      if (elementId) {
+        var button = client.helper.waitForElement(elementId);
+        button.click();
+      }
     },
 
     /**
      * FIX:
-     * This is a kludge to figure out why marionette JS tap()/click() isn't
+     * This is a kludge to figure out why Frackin marionette JS tap()/click() isn't
      * working on COPPA page
      * Delete this function when done
      */
@@ -160,97 +180,53 @@ FxA.prototype = {
             .click();
     },
 
+    /**
+     * TODO
+     */
+    validateEmailConfirmation: function(email) {
+        var http = require('http');
+        var mailHost = 'http://restmail.net/';
+        //var client = http.request(3000, mailHost);
+        var params = 'mail/kilroy_nniwk3@restmail.net';
+        var chunk = "";
+
+        http.get(mailHost + params, function(res) {
+            console.log("Got response: " + res.statusCode);
+            res.setEncoding('utf8');
+            res.on('data', function (chunk) {
+                console.log('BODY: ' + chunk);
+            });
+            if(chunk === '[]') {
+                console.log("NEW USER - NO MESSAGES");
+            } else {
+                console.log("EXISTING USER - 1 CONFIRM MSG");
+            }
+
+        }).on('error', function(e) {
+            console.log("Got error: " + e.message);
+        });
+        /*
+         //var request = client.request('PUT', '/users/1');
+         //request.write("stuff");
+         var request = client.request('GET', params);
+         reques
+         request.write("stuff");
+         request.end();
+         request.on("response", function (response) {
+         // handle the response
+         });
+         */
+    },
+
+    /**
+     * diagnostic only
+     */
     dumpPageSource: function () {
       client.pageSource(function (err, dump) {
         var LINE = new Array(100).join('*');
         console.log(LINE + '\n' + dump + '\n' + LINE);
       });
     }
-
-//    /**
-//     * create a unique email every time using a timestamp
-//     * convert timestamp to base 36 to shrink it down
-//     */
-//
-//    _getUniqueUsername: function () {
-//       var date = new Date();
-//       var YYYY = date.getFullYear().toString().substr(2,2);
-//       var MM = date.getMonth();
-//       var DD = date.getDay();
-//       var hh = date.getHours();
-//       var mm = date.getMinutes();
-//       var ss = date.getSeconds();
-//       var uniqueNum = YYYY + MM + DD + hh + mm + ss;
-//       uniqueNum = this._convertFromBaseToBase(uniqueNum, 10, 36);
-//       return 'kilroy_' + uniqueNum;
-//    },
-//
-//    _convertFromBaseToBase: function(str, fromBase, toBase){
-//      var num = parseInt(str, fromBase);
-//      return num.toString(toBase);
-//    },
-//
-//    /**
-//     * TODO:
-//     * enhance this function to also allow for generation of
-//     * a variety of "invalid" email strings
-//     * strings
-//     * @returns {string}
-//     * @private
-//     */
-//    _getEmail: function() {
-//      var email;
-//      email = this._getUniqueUsername() + '@restmail.net';
-//      // HARD-WIRING EXISTING EMAIL TIL COPPA ISSUE FIXED
-//      email = 'rmpappalardo@gmail.com';
-//      return email;
-//    },
-//
-//    /**
-//     * TODO:
-//     * enhance this function to also allow for generation of
-//     * a variety of "invalid" password strings
-//     * @returns {string}
-//     * @private
-//     */
-//    _getPassword: function() {
-//        return '12345678';
-//    },
-//
-//    getNewUser: function() {
-//        var user = new Object();
-//        user['email'] = this._getEmail();
-//        user['password'] = this._getPassword();
-//      return user;
-//    },
-//
-//    validateEmail: function() {
-//        var http = require('http');
-//        var mailHost = 'http://restmail.net/';
-//        //var client = http.request(3000, mailHost);
-//        var params = 'mail/kilroy_nniwk3@restmail.net';
-//        http.get(mailHost + params, function(res) {
-//            console.log("Got response: " + res.statusCode);
-//            res.setEncoding('utf8');
-//            res.on('data', function (chunk) {
-//                console.log('BODY: ' + chunk);
-//            });
-//        }).on('error', function(e) {
-//            console.log("Got error: " + e.message);
-//        });
-//        /*
-//        //var request = client.request('PUT', '/users/1');
-//        //request.write("stuff");
-//        var request = client.request('GET', params);
-//        reques
-//        request.write("stuff");
-//        request.end();
-//        request.on("response", function (response) {
-//            // handle the response
-//        });
-//        */
-//    }
-
 };
 
 module.exports = FxA;

@@ -5,7 +5,7 @@ var FxAUser = require('./../../../../shared/test/marionette/lib/fxa_user');
 var assert = require('assert');
 //var SHARED_PATH = __dirname + '/../../../../shared/test/marionette/lib';
 
-marionette('Launch UITest > API > FxA', function() {
+marionette('Launch test: UITest > API > FxA', function() {
   var app;
   var selectors;
   var fxaUser;
@@ -25,14 +25,11 @@ marionette('Launch UITest > API > FxA', function() {
   setup(function() {
 
     /**
-     * String Origin of FxA app
+     * String Origin of UITest app
      * @type {string}
      */
     var URL = 'app://uitest.gaiamobile.org';
     //client.contentScript.inject(SHARED_PATH + '/fxa.js');
-
-    var fxaNewUser = new FxAUser(client);
-    fxaUser = fxaNewUser.newUser;
 
     app = new FxA(client, URL);
     app.runUITestMenu = runUITestMenu;
@@ -42,17 +39,15 @@ marionette('Launch UITest > API > FxA', function() {
   });  // end: setup
 
   test('should step through flow for new user', function () {
-     //app.validateEmail();
-     assert.ok(app.enterInput(selectors.emailInput, fxaUser.email) !== -1);
+     assert.ok(app.enterInput(selectors.emailInput, app.email) !== -1);
      assert.ok(app.onClick(selectors.moduleNext) !== -1);
 
      // FIX THIS:
-     // Marionette JS not tapping elements on COPPA page!!!!
-     // Frack!!!
-     //assert.ok(app.selectAgeSelect(selectors.COPPAOption) !== -1);
-     //assert.ok(app.onClick(selectors.moduleNext) !== -1);
+     // Frackin marionette JS not tapping elements on COPPA page!!!!
+     assert.ok(app.selectAgeSelect(selectors.COPPAOption) !== -1);
+     assert.ok(app.onClick(selectors.moduleNext) !== -1);
 
-     assert.ok(app.enterInput(selectors.passwordInput, fxaUser.password) !== -1);
+     assert.ok(app.enterInput(selectors.passwordInput, app.password) !== -1);
      assert.ok(app.onClick(selectors.moduleNext) !== -1);
      assert.ok(app.onClick(selectors.moduleDone) !== -1);
 
@@ -61,20 +56,23 @@ marionette('Launch UITest > API > FxA', function() {
 
      // DIAGNOSTIC
      //app.dumpPageSource();
-
   });
 
+  test('should validate email confirmation sent', function () {
+      app.validateEmailConfirmation(app.email);
+  });
+/*
   test('should step through flow for existing user', function () {
-    assert.ok(app.enterInput(selectors.emailInput, fxaUser.email) !== -1);
-    assert.ok(app.onClick(selectors.moduleNext) !== -1);
+      assert.ok(app.enterInput(selectors.emailInput, app.email) !== -1);
+      assert.ok(app.onClick(selectors.moduleNext) !== -1);
 
-    assert.ok(app.enterInput(selectors.passwordInput, fxaUser.password) !== -1);
-    assert.ok(app.onClick(selectors.moduleNext) !== -1);
-    assert.ok(app.onClick(selectors.moduleDone) !== -1);
+      //assert.ok(app.enterInput(selectors.passwordInput, fxaUser.password) !== -1);
+      assert.ok(app.enterInput(selectors.passwordInput, app.password) !== -1);
+      assert.ok(app.onClick(selectors.moduleNext) !== -1);
 
-    // INVALID PW
-    //assert.ok(app.onClick(selectors.errorOK) !== -1);
+      assert.ok(app.onClick(selectors.moduleDone) !== -1);
   });
+*/
 
 });  // end: marionette
 

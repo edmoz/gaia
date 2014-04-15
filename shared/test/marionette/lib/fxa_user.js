@@ -45,9 +45,9 @@ FxAUser.prototype = {
     get _email() {
         var email;
         //email = this._getUniqueUsername() + '@restmail.net';
-        email = this._uniqueUsername + '@restmail.net';
+        email = this._uniqueUserName + '@restmail.net';
         // HARD-WIRING EXISTING EMAIL TIL COPPA ISSUE FIXED
-        email = 'rmpappalardo@gmail.com';
+        //email = 'rmpappalardo2@gmail.com';
         return email;
     },
 
@@ -71,35 +71,7 @@ FxAUser.prototype = {
         return user;
     },
 
-    /**
-     * TODO
-     */
-    _validateEmail: function() {
-        var http = require('http');
-        var mailHost = 'http://restmail.net/';
-        //var client = http.request(3000, mailHost);
-        var params = 'mail/kilroy_nniwk3@restmail.net';
-        http.get(mailHost + params, function(res) {
-            console.log("Got response: " + res.statusCode);
-            res.setEncoding('utf8');
-            res.on('data', function (chunk) {
-                console.log('BODY: ' + chunk);
-            });
-        }).on('error', function(e) {
-            console.log("Got error: " + e.message);
-        });
-        /*
-         //var request = client.request('PUT', '/users/1');
-         //request.write("stuff");
-         var request = client.request('GET', params);
-         reques
-         request.write("stuff");
-         request.end();
-         request.on("response", function (response) {
-         // handle the response
-         });
-         */
-    },
+
 
     _convertFromBaseToBase: function(str, fromBase, toBase){
         var num = parseInt(str, fromBase);
