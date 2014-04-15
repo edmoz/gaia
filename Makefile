@@ -777,6 +777,12 @@ test-integration-test:
 		--manifest $(TEST_MANIFEST) \
 		--reporter $(REPORTER)
 
+
+.PHONY: fxa 
+FILE := TEST_FILES
+TEST_FILES := $(shell cat ${FILE})
+fxa: test-integration-test TEST_FILES='$(TEST_FILES)`'
+
 .PHONY: caldav-server-install
 caldav-server-install:
 	pip install virtualenv

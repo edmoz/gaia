@@ -1,5 +1,6 @@
 'use strict';
 
+//var http = require('http');
 var assert = require('assert');
 var FxAUser = require('./fxa_user');
 /**
@@ -21,6 +22,8 @@ function FxA(client, URL) {
 }
 
 FxA.maxTimeInMS = 3000;
+FxA._confirmationMessage = 'you are seconds away from verifying your Firefox Account';
+var LEN_NO_MAIL = 10;
 
 FxA.config = {
     settings: {
@@ -63,39 +66,39 @@ FxA.config = {
  */
 
 FxA.Selectors = {
-  body: 'body',
-  bodyReady: 'body .view-body',
+    body: 'body',
+    bodyReady: 'body .view-body',
 
-  // test_apps/uitest
-  apiFxaFrame: 'test-iframe',
-  fxaFrame:  'fxa-iframe',
-  tabAPI: '#API',
-  fxaButton: '#mozId-fxa',
-  requestButton: '#request',
+    // test_apps/uitest
+    apiFxaFrame: 'test-iframe',
+    fxaFrame:  'fxa-iframe',
+    tabAPI: '#API',
+    fxaButton: '#mozId-fxa',
+    requestButton: '#request',
 
-  // test_apps/test-fxa-client
+    // test_apps/test-fxa-client
 
-  // apps/settings
-  menuItemFxa: '#menuItem-fxa',
-  fxaLogin: '#fxa-login',
+    // apps/settings
+    menuItemFxa: '#menuItem-fxa',
+    fxaLogin: '#fxa-login',
 
-  // apps/communications/ftu
-  forward: '#forward',
-  createAccountOrLogin: '#fxa-create-account',
+    // apps/communications/ftu
+    forward: '#forward',
+    createAccountOrLogin: '#fxa-create-account',
 
-  // apps/homescreen/everything.me/modules/Results/providers?? marketplace
-  // apps/findmydevice
+    // apps/homescreen/everything.me/modules/Results/providers?? marketplace
+    // apps/findmydevice
 
-  // fxa - these will stay here
-  emailInput: '#fxa-email-input',
-  passwordInput: '#fxa-pw-input',
-  passwordSetInput: '#fxa-pw-set-input',
-  passwordRefresh: '#fxa-pw-input-refresh',
-  COPPA: '#fxa-age-select',
-  COPPAOption: 'option[value="1990"]',
-  moduleNext: '#fxa-module-next',
-  moduleDone: '#fxa-module-done',
-  errorOK: '#fxa-error-ok'
+    // fxa - these will stay here
+    emailInput: '#fxa-email-input',
+    passwordInput: '#fxa-pw-input',
+    passwordSetInput: '#fxa-pw-set-input',
+    passwordRefresh: '#fxa-pw-input-refresh',
+    COPPA: '#fxa-age-select',
+    COPPAOption: 'option[value="1990"]',
+    moduleNext: '#fxa-module-next',
+    moduleDone: '#fxa-module-done',
+    errorOK: '#fxa-error-ok'
 };
 
 FxA.prototype = {
@@ -103,43 +106,43 @@ FxA.prototype = {
      * Launches FxA app and focuses on frame.
      */
     launch: function () {
-      var client = this.client;
+        var client = this.client;
 
-      // do unless FTU
-      if(this.URL.search("communications") === -1) {
-          client.apps.launch(this.URL);
-      }
-      client.apps.switchToApp(this.URL);
+        // do unless FTU
+        if(this.URL.search("communications") === -1) {
+            client.apps.launch(this.URL);
+        }
+        client.apps.switchToApp(this.URL);
     },
 
     relaunch: function () {
-      this.client.apps.close(this.URL, 'FxA');
-      this.launch();
+        this.client.apps.close(this.URL, 'FxA');
+        this.launch();
     },
 
     selectAgeSelect: function(selectOption) {
-      this.client.helper.wait(FxA.maxTimeInMS);
-      assert.ok(this.onClickFrack(FxA.Selectors.COPPA) !== -1);
-      //assert.ok(this.onClick('#fxa-year-of-birth') !== -1);
-      this.client.helper.wait(FxA.maxTimeInMS);
-      //assert.ok(this.onClick(selectOption) !== -1);
-      this.client.helper.wait(FxA.maxTimeInMS);
+        this.client.helper.wait(FxA.maxTimeInMS);
+        assert.ok(this.onClickFrack(FxA.Selectors.COPPA) !== -1);
+        //assert.ok(this.onClick('#fxa-year-of-birth') !== -1);
+        this.client.helper.wait(FxA.maxTimeInMS);
+        //assert.ok(this.onClick(selectOption) !== -1);
+        this.client.helper.wait(FxA.maxTimeInMS);
 
-      //this.client.findElement('#time-header a[href="/event/add/"]');
+        //this.client.findElement('#time-header a[href="/event/add/"]');
     },
 
     clickDone: function() {
-      this.client.switchToFrame();
-      this.client.switchToFrame(FxA.Selectors.fxaFrame);
-      this.client.helper.wait(FxA.maxTimeInMS);
-      assert.ok(this.onClick(FxA.Selectors.moduleDone) !== -1);
+        this.client.switchToFrame();
+        this.client.switchToFrame(FxA.Selectors.fxaFrame);
+        this.client.helper.wait(FxA.maxTimeInMS);
+        assert.ok(this.onClick(FxA.Selectors.moduleDone) !== -1);
     },
 
     enterInput: function (inputId, inputString) {
-      this.client.helper
-          .waitForElement(inputId)
-          .sendKeys(inputString)
-      this.client.helper.wait(FxA.maxTimeInMS);
+        this.client.helper
+            .waitForElement(inputId)
+            .sendKeys(inputString)
+        this.client.helper.wait(FxA.maxTimeInMS);
     },
 
     onClick:  function(elementId) {
@@ -147,14 +150,6 @@ FxA.prototype = {
         this.client.helper
             .waitForElement(elementId)
             .tap();
-    },
-
-    onClickFrack:  function(elementId) {
-      console.log("ELEMENT: " + elementId);
-      if (elementId) {
-        var button = client.helper.waitForElement(elementId);
-        button.click();
-      }
     },
 
     /**
@@ -169,11 +164,11 @@ FxA.prototype = {
         console.log("long ELEMENT: " + elementId);
         //this.client.findElement("#fxa-age-select", function(err, element) {
         this.client.findElement(elementId, function(err, element) {
-          if(err) {
-            console.log(elementId + " not found");
-          } else {
-              console.log(elementId + " found");
-          };
+            if(err) {
+                console.log(elementId + " not found");
+            } else {
+                console.log(elementId + " found");
+            };
         });
         this.client.helper
             .waitForElement(elementId)
@@ -182,29 +177,65 @@ FxA.prototype = {
 
     /**
      * TODO
+     * restmail throwing intermittent socket hang ups
+     * fix or install a different restmail.net server for tests
+     * @param email
      */
-    validateEmailConfirmation: function(email) {
+    isConfirmedEmail: function(email) {
         var http = require('http');
-        var mailHost = 'http://restmail.net/';
-        //var client = http.request(3000, mailHost);
-        var params = 'mail/kilroy_nniwk3@restmail.net';
-        var chunk = "";
+        var chunk = '';
+        var chunks = '';
 
-        http.get(mailHost + params, function(res) {
-            console.log("Got response: " + res.statusCode);
-            res.setEncoding('utf8');
+        // getting socket hang up error
+        var options = {
+            host: 'restmail.net',
+            port: 80,
+            path: 'mail/' + email
+        }
+
+        var options = {
+            host: 'google.com',
+            port: 80,
+            path: 'index.html'
+        }
+
+
+        console.log(options);
+
+        //var client = http.request(3000, mailHost);
+
+        http.get(options, function(res){
+            console.log("HTPP response: " + res.statusCode);
+            //res.setEncoding('utf8');
+
             res.on('data', function (chunk) {
-                console.log('BODY: ' + chunk);
+                //console.log('BODY: ' + chunk);
+
+                if (chunk.length <= LEN_NO_MAIL) {
+                    console.log("NEW USER - NO MESSAGES");
+                    chunks += chunk;
+                } else {
+                    console.log("EXISTING USER - 1 CONFIRM MSG");
+                    chunks += chunk;
+                }
             });
-            if(chunk === '[]') {
-                console.log("NEW USER - NO MESSAGES");
-            } else {
-                console.log("EXISTING USER - 1 CONFIRM MSG");
-            }
+            res.on('end', function() {
+                chunks += chunk;
+                console.log("BODY: " + chunks);
+            })
 
         }).on('error', function(e) {
-            console.log("Got error: " + e.message);
+            console.log("HTTP ERROR: " + e.message);
         });
+    },
+
+    /**
+     * TODO
+     * cleanup restmail email
+     * cleanup FxA account
+     * @param email
+     */
+    deleteConfirmedEmail: function(email) {
         /*
          //var request = client.request('PUT', '/users/1');
          //request.write("stuff");
@@ -222,10 +253,10 @@ FxA.prototype = {
      * diagnostic only
      */
     dumpPageSource: function () {
-      client.pageSource(function (err, dump) {
-        var LINE = new Array(100).join('*');
-        console.log(LINE + '\n' + dump + '\n' + LINE);
-      });
+        client.pageSource(function (err, dump) {
+            var LINE = new Array(100).join('*');
+            console.log(LINE + '\n' + dump + '\n' + LINE);
+        });
     }
 };
 

@@ -41,13 +41,11 @@ FxAUser.prototype = {
      * @returns {string}
      * @private
      */
-    //_getEmail: function() {
     get _email() {
         var email;
-        //email = this._getUniqueUsername() + '@restmail.net';
         email = this._uniqueUserName + '@restmail.net';
         // HARD-WIRING EXISTING EMAIL TIL COPPA ISSUE FIXED
-        //email = 'rmpappalardo2@gmail.com';
+        email = 'dammit_jim@restmail.net';
         return email;
     },
 
@@ -70,8 +68,6 @@ FxAUser.prototype = {
         user['password'] = this._password;
         return user;
     },
-
-
 
     _convertFromBaseToBase: function(str, fromBase, toBase){
         var num = parseInt(str, fromBase);

@@ -1,0 +1,3 @@
+./test_apps/uitest/test/marionette/fxa_workflow_test.js
+./apps/settings/test/marionette/tests/fxa_workflow_test.js 
+./apps/communications/ftu/test/marionette/fxa_workflow_test.js 
