@@ -778,11 +778,17 @@ test-integration-test:
 		--reporter $(REPORTER)
 
 
-.PHONY: fxa 
-FILE := TEST_FILES
-TEST_FILES := $(shell cat ${FILE})
-fxa: test-integration-test TEST_FILES='$(TEST_FILES)`'
-
+TEST_LIST_FILE := TEST_FILES
+TESTS := TEST_FILES="$(shell cat ${TEST_LIST_FILE})"
+export TEST_FILES=$(TESTS)
+.PHONY: fxa
+fxa: test-integration-test 
+#	./bin/gaia-marionette\
+#		--host $(MARIONETTE_RUNNER_HOST) \
+#		--manifest $(TEST_MANIFEST) \
+#		--reporter $(REPORTER) \
+		
+	
 .PHONY: caldav-server-install
 caldav-server-install:
 	pip install virtualenv

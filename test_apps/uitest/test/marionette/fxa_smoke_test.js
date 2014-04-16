@@ -34,21 +34,17 @@ marionette('Launch test: UITest > API > FxA', function() {
     app = new FxA(client, URL);
     app.runUITestMenu = runUITestMenu;
     selectors = FxA.Selectors;
-    //console.log("T/F: " + app.isConfirmedEmail(app.email));
     app.launch();
     app.runUITestMenu();
   });  // end: setup
 
-  /**
-   * Commenting out COPPA pages and hard-wiring only existing
-   * FxA account for now.
-   * FIX: not executing .tap(), .click() on COPPA this page
-   */
+   test('should be a new user account', function () {
+     assert.ok(!app.accountExists(app.email), 'account already exists!');
+   });
 
-  /*
-  test('should step through flow for new user', function () {
-     //assert.ok(app.isConfirmedEmail(app.email) === false,
-     //    'should be a new account!' );
+  // COPPA page isn't working with marionette js .tap(), .click()
+  // so, disabling for now
+  test.skip('should step through flow for new user', function () {
      assert.ok(app.enterInput(selectors.emailInput, app.email) !== -1);
      assert.ok(app.onClick(selectors.moduleNext) !== -1);
 
@@ -59,28 +55,22 @@ marionette('Launch test: UITest > API > FxA', function() {
      assert.ok(app.onClick(selectors.moduleNext) !== -1);
      assert.ok(app.onClick(selectors.moduleDone) !== -1);
 
-     // INVALID PW
-     //assert.ok(app.onClick(selectors.errorOK) !== -1);
-
      // DIAGNOSTIC
      //app.dumpPageSource();
   });
-  */
 
-  test('should test for existing user account', function () {
-    app.isConfirmedEmail(app.email);
+  test('should be an existing user account', function () {
+    assert.ok(app.accountExists(app.email), 'account doesn\'t exist yet!');
   });
 
   test('should step through flow for existing user', function () {
-      //assert.ok(app.isConfirmedEmail(app.email) === false,
-       //   'should be an existing account!');
-      assert.ok(app.enterInput(selectors.emailInput, app.email) !== -1);
-      assert.ok(app.onClick(selectors.moduleNext) !== -1);
+    assert.ok(app.enterInput(selectors.emailInput, app.email) !== -1);
+    assert.ok(app.onClick(selectors.moduleNext) !== -1);
 
-      assert.ok(app.enterInput(selectors.passwordInput, app.password) !== -1);
-      assert.ok(app.onClick(selectors.moduleNext) !== -1);
+    assert.ok(app.enterInput(selectors.passwordInput, app.password) !== -1);
+    assert.ok(app.onClick(selectors.moduleNext) !== -1);
 
-      assert.ok(app.onClick(selectors.moduleDone) !== -1);
+    assert.ok(app.onClick(selectors.moduleDone) !== -1);
   });
 
 });  // end: marionette

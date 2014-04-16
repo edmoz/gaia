@@ -178,44 +178,44 @@ FxA.prototype = {
     },
 
     /**
-     * TODO
-     * restmail throwing intermittent socket hang ups
-     * fix or install a different restmail.net server for tests
+     * check restmail.net server for confirmation email
      * @param email
+     * @returns {boolean}
      */
-    isConfirmedEmail: function(email) {
-      var chunk = '';
-      var chunks = '';
 
-      var options = FxA._mailHost + email;
-      //var options = 'http://restmail.net/mail/rmpappalardo10@restmail.net';
+    _getRestmail: function(url, callback) {
+        var chunk = '';
+        var chunks = '';
 
-      http.get(options, function(res){
-        console.log("HTPP response: " + res.statusCode);
-        res.setEncoding('utf8');
+        console.log("URL: " + url);
+        http.get(url, function(res){
+            res.setEncoding('utf8');
 
-        res.on('data', function (chunk) {
+            res.on('data', function (chunk) {
+              chunks += chunk;
+            });
 
-          if (chunk.length <= LEN_NO_MAIL) {
-            console.log("NEW USER - NO MESSAGES");
-            chunks += chunk;
-            return false;
-          } else {
-            console.log("EXISTING USER - 1 CONFIRM MSG");
-            chunks += chunk;
-            return true;
-          }
+            res.on('end', function() {
+              if (chunks.length <= LEN_NO_MAIL) {
+                //console.log("NEW USER: no confirmation email");
+                callback(false);
+              } else {
+                //console.log("EXISTING USER: confirmation email exists");
+                callback(true);
+              }
+            });
+        }).on('error', function(e) {
+            console.log("HTTP ERROR: " + e.message);
         });
+    },
 
-        res.on('end', function() {
-          chunks += chunk;
-          //console.log("BODY: " + chunks);
-        })
+    accountExists: function(email) {
+      var url = FxA._mailHost + email;
 
+      this._getRestmail(url, function(isConfirmed) {
+          return isConfirmed
+      })
 
-      }).on('error', function(e) {
-        console.log("HTTP ERROR: " + e.message);
-      });
     },
 
     /**
@@ -224,7 +224,7 @@ FxA.prototype = {
      * cleanup FxA account
      * @param email
      */
-    deleteConfirmedEmail: function(email) {
+    _deleteRestmail: function(email) {
         /*
          //var request = client.request('PUT', '/users/1');
          //request.write("stuff");
