@@ -2,6 +2,7 @@
 
 //var http = require('http');
 var assert = require('assert');
+var http = require('http');
 var FxAUser = require('./fxa_user');
 /**
  * Abstraction around FxA app.
@@ -23,6 +24,7 @@ function FxA(client, URL) {
 
 FxA.maxTimeInMS = 3000;
 FxA._confirmationMessage = 'you are seconds away from verifying your Firefox Account';
+FxA._mailHost = 'http://restmail.net/mail/';
 var LEN_NO_MAIL = 10;
 
 FxA.config = {
@@ -182,51 +184,38 @@ FxA.prototype = {
      * @param email
      */
     isConfirmedEmail: function(email) {
-        var http = require('http');
-        var chunk = '';
-        var chunks = '';
+      var chunk = '';
+      var chunks = '';
 
-        // getting socket hang up error
-        var options = {
-            host: 'restmail.net',
-            port: 80,
-            path: 'mail/' + email
-        }
+      var options = FxA._mailHost + email;
+      //var options = 'http://restmail.net/mail/rmpappalardo10@restmail.net';
 
-        var options = {
-            host: 'google.com',
-            port: 80,
-            path: 'index.html'
-        }
+      http.get(options, function(res){
+        console.log("HTPP response: " + res.statusCode);
+        res.setEncoding('utf8');
 
+        res.on('data', function (chunk) {
 
-        console.log(options);
-
-        //var client = http.request(3000, mailHost);
-
-        http.get(options, function(res){
-            console.log("HTPP response: " + res.statusCode);
-            //res.setEncoding('utf8');
-
-            res.on('data', function (chunk) {
-                //console.log('BODY: ' + chunk);
-
-                if (chunk.length <= LEN_NO_MAIL) {
-                    console.log("NEW USER - NO MESSAGES");
-                    chunks += chunk;
-                } else {
-                    console.log("EXISTING USER - 1 CONFIRM MSG");
-                    chunks += chunk;
-                }
-            });
-            res.on('end', function() {
-                chunks += chunk;
-                console.log("BODY: " + chunks);
-            })
-
-        }).on('error', function(e) {
-            console.log("HTTP ERROR: " + e.message);
+          if (chunk.length <= LEN_NO_MAIL) {
+            console.log("NEW USER - NO MESSAGES");
+            chunks += chunk;
+            return false;
+          } else {
+            console.log("EXISTING USER - 1 CONFIRM MSG");
+            chunks += chunk;
+            return true;
+          }
         });
+
+        res.on('end', function() {
+          chunks += chunk;
+          //console.log("BODY: " + chunks);
+        })
+
+
+      }).on('error', function(e) {
+        console.log("HTTP ERROR: " + e.message);
+      });
     },
 
     /**

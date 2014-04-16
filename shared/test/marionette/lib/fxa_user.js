@@ -45,7 +45,7 @@ FxAUser.prototype = {
         var email;
         email = this._uniqueUserName + '@restmail.net';
         // HARD-WIRING EXISTING EMAIL TIL COPPA ISSUE FIXED
-        email = 'dammit_jim@restmail.net';
+        email = 'rmpappalardo15@restmail.net';
         return email;
     },
 

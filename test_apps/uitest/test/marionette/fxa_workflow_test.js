@@ -34,6 +34,7 @@ marionette('Launch test: UITest > API > FxA', function() {
     app = new FxA(client, URL);
     app.runUITestMenu = runUITestMenu;
     selectors = FxA.Selectors;
+    //console.log("T/F: " + app.isConfirmedEmail(app.email));
     app.launch();
     app.runUITestMenu();
   });  // end: setup
@@ -66,8 +67,11 @@ marionette('Launch test: UITest > API > FxA', function() {
   });
   */
 
+  test('should test for existing user account', function () {
+    app.isConfirmedEmail(app.email);
+  });
+
   test('should step through flow for existing user', function () {
-      app.isConfirmedEmail(app.email);
       //assert.ok(app.isConfirmedEmail(app.email) === false,
        //   'should be an existing account!');
       assert.ok(app.enterInput(selectors.emailInput, app.email) !== -1);
