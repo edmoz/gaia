@@ -1,3 +1,5 @@
-./test_apps/uitest/test/marionette/fxa_smoke_test.js
-./apps/settings/test/marionette/tests/fxa_smoke_test.js
-./apps/communications/ftu/test/marionette/fxa_smoke_test.js
+./apps/communications/ftu/test/marionette/fxa_smoke_test.js 
+./test_apps/uitest/test/marionette/fxa_smoke_test.js 
+./apps/settings/test/marionette/tests/fxa_smoke_test.js 
+./test_apps/test-fxa-client/test/marionette/fxa_smoke_test.js 
+./apps/communications/ftu/test/marionette/fxa_smoke_test.js 

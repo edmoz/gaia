@@ -5,7 +5,7 @@ var FxAUser = require('./../../../../../shared/test/marionette/lib/fxa_user');
 var assert = require('assert');
 //var SHARED_PATH = __dirname + '/../../../../shared/test/marionette/lib';
 
-marionette('Launch test: FTU > FxA', function() {
+marionette('Launch: FTU > FxA', function() {
     var app;
     var selectors;
     var fxaUser;
@@ -20,7 +20,10 @@ marionette('Launch test: FTU > FxA', function() {
         }
         // waitForElement is used to make sure animations and page changes have
         // finished, and that the panel is displayed.
+
+        app.dumpPageSource();
         client.helper.waitForElement(panelId);
+
         if (buttonId) {
             client.helper.wait(FxA.maxTimeInMS);
             var button = client.helper.waitForElement(buttonId);
@@ -37,7 +40,30 @@ marionette('Launch test: FTU > FxA', function() {
         clickThruPanel('#firefox_accounts', selectors.createAccountOrLogin);
 
         this.client.switchToFrame();
-        this.client.switchToFrame(FxA.Selectors.fxaFrame);
+        this.client.switchToFrame(selectors.fxaFrame);
+    };
+
+    var runFTUMenuTeardown = function() {
+        app.dumpPageSource();
+        for(var item in this.client.findElements('*')) {
+
+            console.log(item);
+            for (var name in item) {
+              if (item.hasOwnProperty(name)) {
+                console.log(name);
+              }
+            }
+        }
+
+        //this.client.switchToFrame();
+        //this.client.switchToFrame(selectors.fxaFrame);
+        //app.onClick("#forward")
+        /*
+        clickThruPanel('#firefox_accounts', '#navbar-next');
+        clickThruPanel('#welcome_browser', '#forward');
+        clickThruPanel('#browser_privacy', '#forward');
+        clickThruPanel('#finish-screen', undefined);
+        */
     };
 
     setup(function() {
@@ -53,18 +79,23 @@ marionette('Launch test: FTU > FxA', function() {
         selectors = FxA.Selectors;
         app.launch();
         app.runFTUMenu = runFTUMenu;
+        app.runFTUMenuTeardown = runFTUMenuTeardown;
         app.runFTUMenu();
     });  // end: setup
 
+    // COPPA page isn't working with .tap(), .click()
+    // so, disabling for now
 
-    test('should step through flow for new user', function () {
+    test.skip('should be a new user account', function () {
+      assert.ok(!app.accountExists(app.email), 'account already exists!');
+    });
+
+    test.skip('should step through flow for new user', function () {
         assert.ok(app.enterInput(selectors.emailInput, app.email) !== -1);
         assert.ok(app.onClick(selectors.moduleNext) !== -1);
 
-        // FIX THIS:
-        // Frackin marionette JS not tapping elements on COPPA page!!!!
-        //assert.ok(app.selectAgeSelect(selectors.COPPAOption) !== -1);
-        //assert.ok(app.onClick(selectors.moduleNext) !== -1);
+        assert.ok(app.selectAgeSelect(selectors.COPPAOption) !== -1);
+        assert.ok(app.onClick(selectors.moduleNext) !== -1);
 
         assert.ok(app.enterInput(selectors.passwordInput, app.password) !== -1);
         assert.ok(app.onClick(selectors.moduleNext) !== -1);
@@ -72,20 +103,24 @@ marionette('Launch test: FTU > FxA', function() {
         assert.ok(app.onClick('#forward') !== -1);
         //clickThruPanel('#firefox_accounts', '#forward');
 
-        // INVALID PW
-        //assert.ok(app.onClick(selectors.errorOK) !== -1);
-
         // DIAGNOSTIC
         //app.dumpPageSource();
     });
 
-    /*
-    teardown(function() {
-        clickThruPanel('#welcome_browser', '#forward');
-        clickThruPanel('#browser_privacy', '#forward');
-        clickThruPanel('#finish-screen', undefined);
+    test.skip('should be an existing user account', function () {
+      assert.ok(app.accountExists(app.email), 'account doesn\'t exist yet!');
     });
-    */
+
+    test('should step through flow for existing user', function () {
+        assert.ok(app.enterInput(selectors.emailInput, app.email) !== -1);
+        assert.ok(app.onClick(selectors.moduleNext) !== -1);
+
+        assert.ok(app.enterInput(selectors.passwordInput, app.password) !== -1);
+        assert.ok(app.onClick(selectors.moduleNext) !== -1);
+        assert.ok(app.onClick(selectors.moduleDone) !== -1);
+        app.runFTUMenuTeardown();
+    });
+
 
 
 });

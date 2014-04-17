@@ -24,7 +24,7 @@ function FxA(client, URL) {
 
 FxA.maxTimeInMS = 3000;
 FxA._confirmationMessage = 'you are seconds away from verifying your Firefox Account';
-FxA._mailHost = 'http://restmail.net/mail/';
+FxA.mailHost = 'http://restmail.net/mail/';
 var LEN_NO_MAIL = 10;
 
 FxA.config = {
@@ -79,6 +79,9 @@ FxA.Selectors = {
     requestButton: '#request',
 
     // test_apps/test-fxa-client
+    tabOpenFlow: '#openFlow',
+    //fxaButton: '#mozId-fxa',
+    //requestButton: '#request',
 
     // apps/settings
     menuItemFxa: '#menuItem-fxa',
@@ -94,10 +97,12 @@ FxA.Selectors = {
     // fxa - these will stay here
     emailInput: '#fxa-email-input',
     passwordInput: '#fxa-pw-input',
+    passwordInputPostCOPPA: '#fxa-pw-set-input',
     passwordSetInput: '#fxa-pw-set-input',
     passwordRefresh: '#fxa-pw-input-refresh',
-    COPPA: '#fxa-age-select',
-    COPPAOption: 'option[value="1990"]',
+    COPPAElementId: '#fxa-coppa',
+    COPPASelectId: 'fxa-age-select',
+    COPPAOptionVal: '1990 or earlier',
     moduleNext: '#fxa-module-next',
     moduleDone: '#fxa-module-done',
     errorOK: '#fxa-error-ok'
@@ -122,17 +127,6 @@ FxA.prototype = {
         this.launch();
     },
 
-    selectAgeSelect: function(selectOption) {
-        this.client.helper.wait(FxA.maxTimeInMS);
-        assert.ok(this.onClickFrack(FxA.Selectors.COPPA) !== -1);
-        //assert.ok(this.onClick('#fxa-year-of-birth') !== -1);
-        this.client.helper.wait(FxA.maxTimeInMS);
-        //assert.ok(this.onClick(selectOption) !== -1);
-        this.client.helper.wait(FxA.maxTimeInMS);
-
-        //this.client.findElement('#time-header a[href="/event/add/"]');
-    },
-
     clickDone: function() {
         this.client.switchToFrame();
         this.client.switchToFrame(FxA.Selectors.fxaFrame);
@@ -148,37 +142,38 @@ FxA.prototype = {
     },
 
     onClick:  function(elementId) {
-        console.log("ELEMENT: " + elementId);
+        console.log("\n\t\tELEMENT: " + elementId);
         this.client.helper
             .waitForElement(elementId)
             .tap();
     },
 
     /**
-     * FIX:
-     * This is a kludge to figure out why Frackin marionette JS tap()/click() isn't
-     * working on COPPA page
-     * Delete this function when done
+     * special click function for <select> tags
+     * see:
+     * apps/settings/elements/languages.html
+     * apps/settings/test/marionette/app/regions/language.js
+     * @param elementId
+     * @param selectId
+     * @param optionValue
      */
-    onClickLong:  function(elementId) {
-        //this.client.helper.wait(FxA.maxTimeInMS);
-        this.dumpPageSource();
-        console.log("long ELEMENT: " + elementId);
-        //this.client.findElement("#fxa-age-select", function(err, element) {
-        this.client.findElement(elementId, function(err, element) {
-            if(err) {
-                console.log(elementId + " not found");
-            } else {
-                console.log(elementId + " found");
-            };
-        });
-        this.client.helper
-            .waitForElement(elementId)
-            .click();
+    onClickSelectOption:  function(elementId, selectId, optionValue) {
+        console.log("\n\t\tELEMENT: " + elementId);
+        //<select name="language.current"></select>
+        //'languageChangeSelect': '#languages select[name="language.current"]',
+        var ageSelect = elementId + ' select[id="' + selectId + '"]';
+        this.client.helper.tapSelectOption(ageSelect, optionValue);
+
+        //TODO(rpappa)
+        // fails without this wait time - bundle with above
+        this.client.helper.wait(FxA.maxTimeInMS);
     },
 
     /**
+     * TODO
      * check restmail.net server for confirmation email
+     * http.get behaving inconsistently within marionette with restmail API
+     * WIP
      * @param email
      * @returns {boolean}
      */
@@ -187,35 +182,54 @@ FxA.prototype = {
         var chunk = '';
         var chunks = '';
 
-        console.log("URL: " + url);
-        http.get(url, function(res){
+        var url = 'http://restmail.net/mail/rmpappalardo16@restmail.net';
+
+        var options = {
+            host: 'restmail.net',
+            path: '/mail/rmpappalardo16@restmail.net',
+            headers: {'Cache-Control':'no-cache'},
+            method: 'GET'
+        };
+
+        //var url = 'http://google.com/';
+        console.log("\n\t\tURL: " + url);
+        var req = http.get(options, function(err, res) {
             res.setEncoding('utf8');
+            var code = res.statusCode;
+            //console.log(res.statusCode);
 
-            res.on('data', function (chunk) {
-              chunks += chunk;
-            });
+            if (res.statusCode === 200) {
+              res.on('data', function (chunk) {
+                chunks += chunk;
+                //console.log("CHUNKS: " + chunks);
+              });
+              res.on('end', function() {
+                callback(chunks);
+              });
+            } else {
+                console.log("server returned no status code");
+            }
 
-            res.on('end', function() {
-              if (chunks.length <= LEN_NO_MAIL) {
-                //console.log("NEW USER: no confirmation email");
-                callback(false);
-              } else {
-                //console.log("EXISTING USER: confirmation email exists");
-                callback(true);
-              }
-            });
         }).on('error', function(e) {
             console.log("HTTP ERROR: " + e.message);
         });
+
+        // send request
+        req.end();
     },
 
-    accountExists: function(email) {
-      var url = FxA._mailHost + email;
+    makeCallback: function(email) {
+        var chunks = '';
+        var url = FxA.mailHost + email;
 
-      this._getRestmail(url, function(isConfirmed) {
-          return isConfirmed
-      })
-
+        this._getRestmail(FxA.mailHost +email, function(chunks) {
+            if (chunks.length <= LEN_NO_MAIL) {
+                console.log("\n\t\tNEW USER: no confirmation email");
+            } else {
+                console.log("\n\t\tEXISTING USER: confirmation email exists");
+            }
+            //console.log("isConfirmed: ",isConfirmed);
+        });
     },
 
     /**

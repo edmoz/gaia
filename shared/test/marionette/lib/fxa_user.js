@@ -44,8 +44,7 @@ FxAUser.prototype = {
     get _email() {
         var email;
         email = this._uniqueUserName + '@restmail.net';
-        // HARD-WIRING EXISTING EMAIL TIL COPPA ISSUE FIXED
-        email = 'rmpappalardo15@restmail.net';
+        console.log('\n\t\tgenerating new account: ', email);
         return email;
     },
 
