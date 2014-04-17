@@ -3,7 +3,7 @@
 //var http = require('http');
 var assert = require('assert');
 var http = require('http');
-var FxAUser = require('./fxa_user');
+//var FxAUser = require('./fxa:_user');
 /**
  * Abstraction around FxA app.
  * app URL is passed in since FxA isn't a standalone app
@@ -12,12 +12,12 @@ var FxAUser = require('./fxa_user');
  * @param URL
  * @constructor
  */
-function FxA(client, URL) {
+function FxA(client, URL, fxaUser) {
     //this.client = client;
     this.client = client.scope({ searchTimeout: 20000 });
     this.URL = URL;
-    var fxaNewUser = new FxAUser(client);
-    var fxaUser = fxaNewUser.newUser;
+//    var fxaNewUser = new FxAUser(client);
+//    var fxaUser = fxaNewUser.newUser;
     this.email = fxaUser.email;
     this.password = fxaUser.password;
 }
@@ -96,10 +96,10 @@ FxA.Selectors = {
 
     // fxa - these will stay here
     emailInput: '#fxa-email-input',
-    passwordInput: '#fxa-pw-input',
-    passwordInputPostCOPPA: '#fxa-pw-set-input',
-    passwordSetInput: '#fxa-pw-set-input',
-    passwordRefresh: '#fxa-pw-input-refresh',
+    pwInput: '#fxa-pw-input',
+    pwInputPostCOPPA: '#fxa-pw-set-input',
+    pwSetInput: '#fxa-pw-set-input',
+    pwRefresh: '#fxa-pw-input-refresh',
     COPPAElementId: '#fxa-coppa',
     COPPASelectId: 'fxa-age-select',
     COPPAOptionVal: '1990 or earlier',
@@ -142,7 +142,7 @@ FxA.prototype = {
     },
 
     onClick:  function(elementId) {
-        console.log("\n\t\tELEMENT: " + elementId);
+        //console.log("\n\t\tELEMENT: " + elementId);
         this.client.helper
             .waitForElement(elementId)
             .tap();

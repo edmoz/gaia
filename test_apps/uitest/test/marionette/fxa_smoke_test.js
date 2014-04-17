@@ -11,6 +11,8 @@ marionette('Launch: UITest > API > FxA', function() {
   var selectors;
   var fxaUser;
   var client = marionette.client();
+  var fxaNewUser = new FxAUser(client);
+  var fxaUser = fxaNewUser.newUser;
 
   var runUITestMenu = function() {
     this.client.helper.wait(FxA.maxTimeInMS);
@@ -23,11 +25,13 @@ marionette('Launch: UITest > API > FxA', function() {
     this.client.switchToFrame(FxA.Selectors.fxaFrame);
    };
 
+
+
   setup(function() {
     var URL = 'app://uitest.gaiamobile.org';
     //client.contentScript.inject(SHARED_PATH + '/fxa.js');
 
-    app = new FxA(client, URL);
+    app = new FxA(client, URL, fxaUser);
     app.runUITestMenu = runUITestMenu;
     selectors = FxA.Selectors;
     app.launch();
@@ -48,8 +52,7 @@ marionette('Launch: UITest > API > FxA', function() {
          selectors.COPPAOptionVal);
 
      assert.ok(app.onClick(selectors.moduleNext) !== -1);
-     assert.ok(app.enterInput(selectors.passwordInputPostCOPPA, app.password) !== -1);
-     console.log("pw input done");
+     assert.ok(app.enterInput(selectors.pwInputPostCOPPA, app.password) !== -1);
      assert.ok(app.onClick(selectors.moduleNext) !== -1);
      assert.ok(app.onClick(selectors.moduleDone) !== -1);
 
@@ -66,7 +69,7 @@ marionette('Launch: UITest > API > FxA', function() {
     assert.ok(app.enterInput(selectors.emailInput, app.email) !== -1);
     assert.ok(app.onClick(selectors.moduleNext) !== -1);
 
-    assert.ok(app.enterInput(selectors.passwordInput, app.password) !== -1);
+    assert.ok(app.enterInput(selectors.pwInput, app.password) !== -1);
     assert.ok(app.onClick(selectors.moduleNext) !== -1);
 
     assert.ok(app.onClick(selectors.moduleDone) !== -1);
