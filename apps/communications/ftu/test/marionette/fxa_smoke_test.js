@@ -10,6 +10,8 @@ marionette('Launch: FTU > FxA', function() {
     var selectors;
     var fxaUser;
     var client = marionette.client();
+    var fxaNewUser = new FxAUser(client);
+    var fxaUser = fxaNewUser.newUser;
 
     var clickThruPanel = function(panelId, buttonId) {
         if (panelId == '#wifi') {
@@ -75,7 +77,7 @@ marionette('Launch: FTU > FxA', function() {
         var URL = 'app://communications.gaiamobile.org';
         //client.contentScript.inject(SHARED_PATH + '/fxa.js');
 
-        app = new FxA(client, URL);
+        app = new FxA(client, URL, fxaUser);
         selectors = FxA.Selectors;
         app.launch();
         app.runFTUMenu = runFTUMenu;
@@ -83,28 +85,27 @@ marionette('Launch: FTU > FxA', function() {
         app.runFTUMenu();
     });  // end: setup
 
-    // COPPA page isn't working with .tap(), .click()
-    // so, disabling for now
-
     test.skip('should be a new user account', function () {
       assert.ok(!app.accountExists(app.email), 'account already exists!');
     });
 
-    test.skip('should step through flow for new user', function () {
+    test('should step through flow for new user', function () {
         assert.ok(app.enterInput(selectors.emailInput, app.email) !== -1);
         assert.ok(app.onClick(selectors.moduleNext) !== -1);
 
-        assert.ok(app.selectAgeSelect(selectors.COPPAOption) !== -1);
-        assert.ok(app.onClick(selectors.moduleNext) !== -1);
+        assert.ok(app.onClickSelectOption(
+         selectors.COPPAElementId,
+         selectors.COPPASelectId,
+         selectors.COPPAOptionVal) !== -1);
 
-        assert.ok(app.enterInput(selectors.passwordInput, app.password) !== -1);
+        assert.ok(app.onClick(selectors.moduleNext) !== -1);
+        assert.ok(app.enterInput(selectors.pwInputPostCOPPA, app.password) !== -1);
+
         assert.ok(app.onClick(selectors.moduleNext) !== -1);
         assert.ok(app.onClick(selectors.moduleDone) !== -1);
         assert.ok(app.onClick('#forward') !== -1);
         //clickThruPanel('#firefox_accounts', '#forward');
-
-        // DIAGNOSTIC
-        //app.dumpPageSource();
+        // FIX (rpappa)
     });
 
     test.skip('should be an existing user account', function () {
@@ -115,7 +116,7 @@ marionette('Launch: FTU > FxA', function() {
         assert.ok(app.enterInput(selectors.emailInput, app.email) !== -1);
         assert.ok(app.onClick(selectors.moduleNext) !== -1);
 
-        assert.ok(app.enterInput(selectors.passwordInput, app.password) !== -1);
+        assert.ok(app.enterInput(selectors.pwInput, app.password) !== -1);
         assert.ok(app.onClick(selectors.moduleNext) !== -1);
         assert.ok(app.onClick(selectors.moduleDone) !== -1);
         app.runFTUMenuTeardown();

@@ -158,7 +158,7 @@ FxA.prototype = {
      * @param optionValue
      */
     onClickSelectOption:  function(elementId, selectId, optionValue) {
-        console.log("\n\t\tELEMENT: " + elementId);
+        //console.log("\n\t\tELEMENT: " + elementId);
         //<select name="language.current"></select>
         //'languageChangeSelect': '#languages select[name="language.current"]',
         var ageSelect = elementId + ' select[id="' + selectId + '"]';
@@ -255,10 +255,29 @@ FxA.prototype = {
     /**
      * diagnostic only
      */
-    dumpPageSource: function () {
+    dumpPageSource: function (fileName) {
+        var path = fileName || "page_dump.html";
+        var fs=require('fs');
+
         client.pageSource(function (err, dump) {
             var LINE = new Array(100).join('*');
-            console.log(LINE + '\n' + dump + '\n' + LINE);
+
+            //console.log(LINE + '\n' + dump + '\n' + LINE);
+
+            var buffer = new Buffer(dump);
+
+            fs.open(path, 'w', function(err, fd) {
+                if (err) {
+                    throw 'error opening file: ' + err;
+                } else {
+                    fs.write(fd, buffer, 0, buffer.length, null, function(err) {
+                        if (err) throw 'error writing file: ' + err;
+                        fs.close(fd, function() {
+                            console.log('\n', "page dumped to: ", path);
+                        })
+                    });
+                }
+            });
         });
     }
 };

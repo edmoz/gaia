@@ -44,7 +44,9 @@ marionette('Launch: UITest > API > FxA', function() {
 
   test('should step through flow for new user', function () {
      assert.ok(app.enterInput(selectors.emailInput, app.email) !== -1);
+     //app.dumpPageSource("dump_uitest_00.html");
      assert.ok(app.onClick(selectors.moduleNext) !== -1);
+     //app.dumpPageSource("dump_uitest_01.html");
 
      app.onClickSelectOption(
          selectors.COPPAElementId,
@@ -55,9 +57,6 @@ marionette('Launch: UITest > API > FxA', function() {
      assert.ok(app.enterInput(selectors.pwInputPostCOPPA, app.password) !== -1);
      assert.ok(app.onClick(selectors.moduleNext) !== -1);
      assert.ok(app.onClick(selectors.moduleDone) !== -1);
-
-     // DIAGNOSTIC
-     //app.dumpPageSource();
   });
 
   test.skip('should be an existing user account', function () {
