@@ -2,20 +2,17 @@
 
 var FxA = require('./lib/fxa'),
     FxAUser = require('./lib/fxa_user'),
-    Server = require('./lib/server'),
-    constants = require('./lib/constants'),
     assert = require('assert');
 
 var STAGE = process.env['FXA_URL'] || "https://api-accounts.stage.mozaws.net/v1";
+var TIMEOUT = process.env['FMD_TIMEOUT'] || 60;
 
 marionette('Launch: FxA - Smoke Tests (app: settings, server: stage)', function() {
-    var server = new Server('stage');
     FxA.config.prefs["identity.fxaccounts.auth.uri"] = STAGE;
     var client = marionette.client(FxA.config);
     var selectors;
     var app;
     var fxaUser;
-    var userType = constants.USER_EXISTING;
     var fxa_user = process.env['FXA_USER'] || 'ed111@restmail.net';
     var fxa_pw = process.env['FXA_PASSWORD'] || '12345678';
 
@@ -33,7 +30,7 @@ marionette('Launch: FxA - Smoke Tests (app: settings, server: stage)', function(
 
     setup(function() {
         var fxaUserObj = new FxAUser(client);
-        fxaUser = fxaUserObj.user(userType);
+        fxaUser = fxaUserObj.user(1);
         app = new FxA(client, fxaUser);
         app.runSettingsMenu = runSettingsMenu;
         selectors = FxA.Selectors;
@@ -51,7 +48,8 @@ marionette('Launch: FxA - Smoke Tests (app: settings, server: stage)', function(
         assert.ok(app.onClick(selectors.moduleDone) !== -1);
         client.switchToFrame();
 
-        client.helper.wait(30*1000);
+        client.helper.wait(TIMEOUT*1000);
+        // TODO: big hack here
         // this is a dummy call - not sure why wait isn't
         assert.ok(app.onClick(selectors.menuItemFmd) !== -1);
     });

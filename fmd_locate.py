@@ -17,7 +17,6 @@ from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 FMD_URL = "https://fmd.stage.mozaws.net"
 OAUTH_SIGNIN = "https://accounts.stage.mozaws.net/oauth/"
 
-
 signin_locator = "Sign in"
 btn_signin_locator = "button.signin"
 btn_signup_locator = "button.signup"
@@ -32,7 +31,6 @@ loading_locator = 'h2'
 map_locator = 'leaflet-map-pane'
 
 TIMEOUT = os.getenv('FMD_TIMEOUT', 60)
-# fxa_exist_user = 'fxa.test.acct@restmail.net'
 fxa_exist_user = os.getenv('FXA_USER', 'ed111@restmail.net')
 fxa_password = os.getenv('FXA_PASSWORD', '12345678')
 
