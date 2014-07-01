@@ -85,9 +85,8 @@ class FMDTest(unittest.TestCase):
             sys.exit(1)
 
     def tearDown(self):
-        # self.driver.quit()
+        self.driver.quit()
         # leave the browser open for now
-        pass
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)
