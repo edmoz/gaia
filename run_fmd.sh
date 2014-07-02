@@ -2,7 +2,7 @@
 # Needs Selenium/WebDriver running http://selenium-release.storage.googleapis.com/2.42/selenium-server-standalone-2.42.2.jar
 # java -jar selenium-server-standalone-2.42.2.jar
 
-export FXA_USER=ed111@restmail.net
+export FXA_USER=fmdprod@restmail.net
 export FXA_PASSWORD=12345678
 
 echo 'launching marionette.js'

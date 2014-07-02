@@ -63,6 +63,7 @@ var FindMyDevice = {
     var self = this;
     this._loadState(function() {
       self._initSettings(self._initMessageHandlers.bind(self));
+      DUMP('findmydevice on ready!');
     });
   },
 
@@ -230,13 +231,14 @@ var FindMyDevice = {
       pushurl: endpoint,
       accepts: Commands.getEnabledCommands()
     };
-
+    DUMP('findmydevice request reg: '+ obj.pushurl);
     if (assertion != null) {
       obj.assert = assertion;
     }
 
     if (this._state !== null) {
       obj.deviceid = this._state.deviceid;
+      DUMP('findmydevice device id: '+ obj.deviceid);
     }
 
     var self = this;

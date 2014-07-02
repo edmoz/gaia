@@ -4,16 +4,16 @@ var FxA = require('./lib/fxa'),
     FxAUser = require('./lib/fxa_user'),
     assert = require('assert');
 
-var STAGE = process.env['FXA_URL'] || "https://api-accounts.stage.mozaws.net/v1";
+//var STAGE = process.env['FXA_URL'] || "https://api-accounts.stage.mozaws.net/v1";
 var TIMEOUT = process.env['FMD_TIMEOUT'] || 60;
 
 marionette('Launch: FxA - Smoke Tests (app: settings, server: stage)', function() {
-    FxA.config.prefs["identity.fxaccounts.auth.uri"] = STAGE;
+    //FxA.config.prefs["identity.fxaccounts.auth.uri"] = STAGE;
     var client = marionette.client(FxA.config);
     var selectors;
     var app;
     var fxaUser;
-    var fxa_user = process.env['FXA_USER'] || 'ed111@restmail.net';
+    var fxa_user = process.env['FXA_USER'] || 'fmdprod@restmail.net';
     var fxa_pw = process.env['FXA_PASSWORD'] || '12345678';
 
     var runSettingsMenu = function() {

@@ -14,8 +14,8 @@ import unittest
 from selenium import webdriver
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 
-FMD_URL = "https://fmd.stage.mozaws.net"
-OAUTH_SIGNIN = "https://accounts.stage.mozaws.net/oauth/"
+FMD_URL = "https://find.firefox.com"
+#FMD_URL = "https://fmd.stage.mozaws.net"
 
 signin_locator = "Sign in"
 btn_signin_locator = "button.signin"
