@@ -17,9 +17,9 @@ then
     exit
 fi
 
-#make test-integration-test TEST_FILES=apps/system/fxa/test/marionette/fmd_test.js > fmd_marionette.log 2>&1 &
+make test-integration-test TEST_FILES=apps/system/fxa/test/marionette/fmd_test.js > fmd_marionette.log 2>&1 &
 sleep 20
-#python fmd_locate.py
+python fmd_locate.py
 
 sleep 120
 done
