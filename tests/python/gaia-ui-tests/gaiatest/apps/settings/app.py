@@ -179,6 +179,16 @@ class Settings(Base):
         self._tap_menu_item(self._sim_manager_menu_item_locator)
         return SimManager(self.marionette)
 
+    def open_firefox_accounts_settings(self):
+        from gaiatest.apps.system.regions.firefox_accounts import FirefoxAccounts
+        self._tap_menu_item(self._firefox_accounts_menu_item_locator)
+        return FirefoxAccounts(self.marionette)
+
+    def open_findmydevice_settings(self):
+        from gaiatest.apps.system.regions.firefox_accounts import FirefoxAccounts
+        self._tap_menu_item(self._findmydevice_menu_item_locator)
+        return FirefoxAccounts(self.marionette)
+
     def _wait_for_menu_item(self, menu_item_locator):
         menu_item = self.marionette.find_element(*menu_item_locator)
 
