@@ -116,14 +116,14 @@ var FindMyDevice = {
       var port = request.port;
       port.onmessage = function(event) {
         if (request.keyword === 'findmydevice-wakeup') {
-          DUMP('got wake up request');
+          DUMP('FMD: got wake up request');
 
           var reason = event.data;
           if (reason === IAC_API_WAKEUP_REASON_ENABLED) {
-            DUMP('enabled, trying to reach the server');
+            DUMP('YO enabled, trying to reach the server');
             self._contactServerIfEnabled();
           } else if (reason === IAC_API_WAKEUP_REASON_STALE_REGISTRATION) {
-            DUMP('stale registration, re-registering');
+            DUMP('FMD: stale registration, re-registering');
             self._registeredHelper.set(false);
           }
 
@@ -131,7 +131,7 @@ var FindMyDevice = {
         }
 
         if (request.keyword === 'findmydevice-test') {
-            DUMP('got request for test command!');
+            DUMP('FMD: got request for test command!');
             event.data.testing = true;
             self._processCommands(event.data);
         }
@@ -153,7 +153,7 @@ var FindMyDevice = {
 
   _register: function fmd_register() {
     DUMP('findmydevice attempting registration.');
-    DUMP('registering: ' + this._registering);
+    DUMP('FMD: registering: ' + this._registering);
 
     if (this._registering) {
       return;
@@ -202,15 +202,16 @@ var FindMyDevice = {
 
     if (assertion == null && this._state == null) {
       // this shouldn't happen
-      throw new Error('Trying to register with no assertion and no state!');
+      throw new Error('FMD: Trying to register with no assertion and no state!');
     }
 
     var pushRequest = navigator.push.register();
     pushRequest.onsuccess = function fmd_push_handler() {
-      DUMP('findmydevice received push endpoint!');
+      DUMP('FMD: findmydevice received push endpoint!');
 
       var endpoint = pushRequest.result;
       if (self._enabled) {
+        DUMP('FMD: findmydevice - endpoint: ' + endpoint);
         self._requestRegistration(assertion, endpoint);
       }
 
@@ -218,7 +219,7 @@ var FindMyDevice = {
     };
 
     pushRequest.onerror = function fmd_push_error_handler() {
-      DUMP('findmydevice push request failed!');
+      DUMP('FMD: findmydevice push request failed!');
 
       self._registering = false;
       self._scheduleAlarm('retry');
@@ -266,7 +267,7 @@ var FindMyDevice = {
       var interval = 1 + Math.floor(5 * Math.random());
       nextAlarm.setMinutes(nextAlarm.getMinutes() + interval);
     } else {
-      DUMP('invalid alarm mode!');
+      DUMP('FMD: invalid alarm mode!');
       return;
     }
 
@@ -331,7 +332,7 @@ var FindMyDevice = {
           return;
       }
 
-      DUMP('command ' + cmd + ', args ' + JSON.stringify(args));
+      DUMP('FMD: command ' + cmd + ', args ' + JSON.stringify(args));
 
       // add the callback as the last argument
       if (cmdobj.testing !== true) {
